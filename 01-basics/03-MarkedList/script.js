@@ -35,18 +35,17 @@ const App = defineComponent({
     };
   },
   computed: {
-    filteredEmails() {
-      return this.emails.filter((el) => this.emailFilter(el));
-    },
-  },
-  methods: {
-    emailFilter(email) {
-      return this.search ? email.toLowerCase().includes(this.search.toLowerCase()) : false;
-    },
-    markedEmail(email) {
-      return {
-        marked: this.emailFilter(email),
+    markedEmails() {
+      const emailFilter = (email) => {
+        return this.search ? email.toLowerCase().includes(this.search.toLowerCase()) : false;
       };
+
+      return this.emails.map((el) => {
+        return {
+          value: el,
+          class: emailFilter(el) ? 'marked' : false,
+        };
+      });
     },
   },
 });

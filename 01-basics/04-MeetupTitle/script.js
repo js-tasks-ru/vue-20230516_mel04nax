@@ -10,22 +10,21 @@ const App = defineComponent({
       meetupTitle: null,
     };
   },
-  methods: {
-    async fetchMeetupById(meetupId) {
-      return fetch(`${API_URL}/meetups/${meetupId}`).then((response) => {
-        if (response.ok) {
-          return response.json();
-        } else {
-          return response.json().then((error) => {
-            throw error;
-          });
-        }
-      });
-    },
-  },
+  methods: {},
   watch: {
     async selectedId(newValue) {
-      const response = await this.fetchMeetupById(newValue);
+      const fetchMeetupById = async (meetupId) => {
+        return fetch(`${API_URL}/meetups/${meetupId}`).then((response) => {
+          if (response.ok) {
+            return response.json();
+          } else {
+            return response.json().then((error) => {
+              throw error;
+            });
+          }
+        });
+      };
+      const response = await fetchMeetupById(newValue);
       this.meetupTitle = response.title;
     },
   },
