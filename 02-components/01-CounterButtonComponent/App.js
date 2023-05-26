@@ -10,20 +10,14 @@ export default defineComponent({
 
   data() {
     return {
-      count: undefined,
+      count: 0,
     };
   },
 
   template: `
     <div class="sample container">
       <p>count = {{ count }}</p>
-      <p>
-        <CounterButton :count="count" @update:count="count = $event" />
-      </p>
-      <p>
-        <CounterButton v-model:count="count" />
-      </p>
-      <p>
+      <p v-for="item in 3">
         <CounterButton v-model:count="count" />
       </p>
     </div>
