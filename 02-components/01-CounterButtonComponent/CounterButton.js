@@ -9,6 +9,7 @@ export default defineComponent({
       default: 0,
     },
   },
+  emits: ['update:count'],
 
   methods: {
     increment() {

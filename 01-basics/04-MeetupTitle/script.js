@@ -10,7 +10,6 @@ const App = defineComponent({
       meetupTitle: null,
     };
   },
-  methods: {},
   watch: {
     async selectedId(newValue) {
       const fetchMeetupById = async (meetupId) => {
