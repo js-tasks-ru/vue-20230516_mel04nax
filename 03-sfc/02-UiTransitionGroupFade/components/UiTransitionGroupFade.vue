@@ -19,12 +19,11 @@ export default {
 
 <style>
 /* _transitions.css */
-
 .fade-list {
   position: relative;
 }
 
-.fade-list > * {
+.fade-list:deep(li) > * {
   opacity: 1;
   transition: opacity 0.3s ease-out;
 }
