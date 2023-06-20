@@ -8,12 +8,7 @@
     <div id="app">
       <div>
         <label v-for="item in 5">
-          <input
-            v-model="selectedId"
-            :value="item"
-            type="radio"
-            name="meetupId"
-          />
+          <input v-model="selectedId" :value="item" type="radio" name="meetupId" />
           {{ item }}
         </label>
         <hr />
