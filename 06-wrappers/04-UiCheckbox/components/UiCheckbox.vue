@@ -1,14 +1,57 @@
 <template>
   <label class="checkbox">
-    <input type="checkbox" class="checkbox__input" />
+    <input v-model="modelValueProxy" v-bind="$attrs" type="checkbox" class="checkbox__input" />
     <span class="checkbox__box"></span>
-    Label Text
+    <slot />
   </label>
 </template>
 
 <script>
 export default {
   name: 'UiCheckbox',
+
+  props: {
+    modelValue: [Boolean, Array, Set],
+  },
+
+  inheritAttrs: false,
+
+  emits: ['update:modelValue'],
+
+  computed: {
+    modelValueProxy: {
+      get() {
+        if (typeof this.modelValue === 'boolean') {
+          return this.modelValue;
+        } else if (Array.isArray(this.modelValue)) {
+          return this.modelValue.includes(this.$attrs?.value);
+        } else {
+          return this.modelValue.has(this.$attrs?.value);
+        }
+      },
+      set(value) {
+        const currentValue = this.$attrs?.value;
+        if (typeof this.modelValue === 'boolean') {
+          this.$emit('update:modelValue', value);
+        } else if (Array.isArray(this.modelValue)) {
+          let newArray;
+          if (this.modelValue.includes(currentValue)) {
+            newArray = this.modelValue.filter((el) => el !== currentValue);
+          } else {
+            newArray = [...this.modelValue, currentValue];
+          }
+          this.$emit('update:modelValue', newArray);
+        } else {
+          const newSet = new Set();
+          for (const item of this.modelValue) {
+            newSet.add(item);
+          }
+          newSet.has(currentValue) ? newSet.delete(currentValue) : newSet.add(currentValue);
+          this.$emit('update:modelValue', newSet);
+        }
+      },
+    },
+  },
 };
 </script>
 

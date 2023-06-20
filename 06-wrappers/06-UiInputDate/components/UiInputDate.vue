@@ -1,7 +1,10 @@
 <template>
-  <UiInput :model-value="value" :type="type" @input="handleInput">
-    <template v-for="slot in Object.keys($slots)" #[slot]>
-      <slot :name="slot" />
+  <UiInput v-bind="$attrs" :modelValue="formattedValue" :type="type" @change="updateValue">
+    <template v-if="$slots['left-icon']" #left-icon>
+      <slot name="left-icon" />
+    </template>
+    <template v-if="$slots['right-icon']" #right-icon>
+      <slot name="right-icon" />
     </template>
   </UiInput>
 </template>
@@ -12,51 +15,50 @@ import UiInput from './UiInput.vue';
 export default {
   name: 'UiInputDate',
 
+  inheritAttrs: false,
+
   components: { UiInput },
 
   props: {
-    modelValue: Number,
-
     type: {
       type: String,
       default: 'date',
-      validator: (type) => ['date', 'datetime-local', 'time'].includes(type),
     },
-
+    modelValue: {
+      type: Number,
+      default: null,
+    },
     step: {
-      type: [Number],
+      type: [String, null],
+      default: null,
     },
   },
 
   emits: ['update:modelValue'],
 
   computed: {
-    value() {
-      // No value - empty string
-      if (typeof this.modelValue === 'undefined' || this.modelValue === null) {
-        return '';
-      }
-
-      // YYYY-MM-DDTHH:MM:SS.mssZ
+    formattedValue() {
+      if (!this.modelValue) return undefined;
       const date = new Date(this.modelValue).toISOString();
 
+      let result;
+
       if (this.type === 'date') {
-        return date.substring(0, 10); // YYYY-MM-DD
-      } else if (this.type === 'datetime-local') {
-        return date.substring(0, 16); // YYYY-MM-DDTHH:MM
+        result = date.substring(0, 10);
       } else if (this.type === 'time') {
-        return this.step && this.step % 60 !== 0
-          ? date.substring(11, 19) // HH:MM:SS
-          : date.substring(11, 16); // HH:MM
+        this.step % 60 === 0 ? (result = date.substring(11, 16)) : (result = date.substring(11, 19));
+      } else {
+        result = date.substring(0, 16);
       }
 
-      return '';
+      return result;
     },
   },
 
   methods: {
-    handleInput($event) {
-      this.$emit('update:modelValue', $event.target.value !== '' ? $event.target.valueAsNumber : undefined);
+    updateValue($event) {
+      const value = $event.target.value ? $event.target.valueAsNumber : undefined;
+      this.$emit('update:modelValue', value);
     },
   },
 };
