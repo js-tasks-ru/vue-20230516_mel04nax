@@ -1,15 +1,100 @@
 <template>
-  <div class="image-uploader">
-    <label class="image-uploader__preview image-uploader__preview-loading" style="--bg-url: url('/link.jpeg')">
-      <span class="image-uploader__text">Загрузить изображение</span>
-      <input type="file" accept="image/*" class="image-uploader__input" />
+  <div class="image-uploader" @click="removeImage">
+    <label class="image-uploader__preview" :class="{ 'image-uploader__preview-loading': isUpload }" :style="imageSrc">
+      <span class="image-uploader__text">{{ previewText }}</span>
+      <input
+        v-bind="$attrs"
+        :disabled="isUpload"
+        type="file"
+        accept="image/*"
+        class="image-uploader__input"
+        @change="uploadImage"
+      />
     </label>
   </div>
 </template>
 
 <script>
+import { uploadImage } from '../ImageService';
+
 export default {
   name: 'UiImageUploader',
+
+  props: {
+    preview: {
+      type: String,
+      default: undefined,
+    },
+    uploader: {
+      type: Function,
+      default: undefined,
+    },
+  },
+
+  emits: ['upload', 'error', 'select', 'remove'],
+
+  inheritAttrs: false,
+
+  data() {
+    return {
+      isUpload: false,
+      isSelecting: false,
+      selectedImageUrl: undefined,
+    };
+  },
+
+  computed: {
+    previewText() {
+      let result = '';
+      if (this.isUpload) {
+        result = 'Загрузка...';
+      } else if (this.selectedImageUrl || (this.preview && !this.isSelecting)) {
+        result = 'Удалить изображение';
+      } else {
+        result = 'Загрузить изображение';
+      }
+      return result;
+    },
+    imageSrc() {
+      let result = null;
+      if (this.preview && !this.selectedImageUrl && !this.isSelecting) {
+        result = `--bg-url: url(${this.preview})`;
+      } else if (this.selectedImageUrl) {
+        result = `--bg-url: url(${this.selectedImageUrl})`;
+      }
+      return result;
+    },
+  },
+
+  methods: {
+    async uploadImage(e) {
+      this.selectedImageUrl = URL.createObjectURL(e.target.files[0]);
+      this.$emit('select', e.target.files[0]);
+
+      if (this.uploader) {
+        try {
+          this.isUpload = true;
+          const response = await this.uploader(e.target.files[0]);
+          this.$emit('upload', response);
+        } catch (error) {
+          this.$emit('error', error);
+          this.selectedImageUrl = undefined;
+        } finally {
+          this.isUpload = false;
+        }
+      }
+
+      e.target.value = '';
+      this.isSelecting = false;
+    },
+    removeImage() {
+      if ((this.selectedImageUrl || this.preview) && !this.isUpload) {
+        this.isSelecting = true;
+        this.$emit('remove');
+        this.selectedImageUrl = undefined;
+      }
+    },
+  },
 };
 </script>
 
